@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data and secrets
+.env
+.env.*
+!.env.example
+data/
+chroma_db/
+*.sqlite3
+PROJECT_STATE.md
