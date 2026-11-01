@@ -1,29 +1,26 @@
 import { useState } from 'react';
-import "./style.css"
 
-function App() {
-  const [status, setStatus] = useState("Not Checked");
+const API_URL = 'http://127.0.0.1:8000';
+
+export default function App() {
+  const [status, setStatus] = useState('Not checked');
 
   async function checkBackend() {
-    try{
-      const response = await fetch("http://127.0.0.1:8000/health");
+    try {
+      const response = await fetch(`${API_URL}/health`);
+      if (!response.ok) throw new Error('Backend request failed');
       const data = await response.json();
-
-      setStatus(data.status === "ok" ? "Connected" : "Error");
-    }catch{
-      setStatus("Backend unavailable");
+      setStatus(data.status === 'ok' ? 'Connected' : 'Unexpected response');
+    } catch {
+      setStatus('Backend unavailable');
     }
   }
 
-  return(
+  return (
     <main>
-      <h1>CodeBase RAG Agent:</h1>
-      <p>Backend status : {status}</p>
-      <button onClick = {checkBackend}>
-        Check backend
-      </button>
+      <h1>Codebase RAG Assistant</h1>
+      <p>Backend status: {status}</p>
+      <button type="button" onClick={checkBackend}>Check backend</button>
     </main>
   );
 }
-
-export default App;

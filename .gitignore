@@ -1,6 +1,8 @@
 # Python
 __pycache__/
 *.py[cod]
+.venv/
+venv/
 .pytest_cache/
 .coverage
 
@@ -22,4 +24,3 @@ Thumbs.db
 data/
 chroma_db/
 *.sqlite3
-PROJECT_STATE.md

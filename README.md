@@ -1,18 +1,20 @@
 # Codebase RAG Assistant
 
-A local-first assistant for exploring repositories, searching code by meaning, and answering questions with source-file evidence. This repository is being built incrementally for learning and local development.
+A free, local-first assistant for exploring repositories, searching code by meaning, and answering questions with source-file evidence. The project is being built incrementally.
 
 ## Current status
 
-Commit 1 establishes the FastAPI API and React + Vite interface. Repository indexing, embeddings, Chroma, Ollama, tree-sitter, and MCP are not implemented yet.
+- **C1:** FastAPI and React + Vite foundation.
+- **C2:** Safe, lightweight repository structure inspection.
+- Not implemented yet: tree-sitter chunking, embeddings, Chroma, Ollama RAG, citation validation, and MCP.
 
 ## Prerequisites
 
-- Python 3.14 
-- Node.js 20.19+ or 22.12+ (recommended for current Vite releases)
+- Python 3.10 or newer
+- Node.js 20.19+ or 22.12+ (for current Vite releases)
 - Git
 
-Check your installations in PowerShell:
+Check versions in PowerShell:
 
 ```powershell
 python --version
@@ -21,9 +23,9 @@ npm --version
 git --version
 ```
 
-## Run the backend (PowerShell terminal 1)
+## Run the backend
 
-From the repository root:
+From the repository root, in terminal 1:
 
 ```powershell
 cd backend
@@ -34,22 +36,37 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-If PowerShell blocks virtual-environment activation, you can run the venv's Python directly instead:
+If PowerShell blocks activation, use the venv executables directly:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-Check these URLs in your browser:
+Useful endpoints:
 
 - http://127.0.0.1:8000/ — welcome response
 - http://127.0.0.1:8000/health — health check
 - http://127.0.0.1:8000/docs — interactive API documentation
+- `POST /repository/inspect` — inspect a local repository
 
-## Run the frontend (PowerShell terminal 2)
+### Inspect a repository
 
-From the repository root in a second terminal:
+Use Swagger UI at http://127.0.0.1:8000/docs. Open `POST /repository/inspect`, select **Try it out**, and provide an absolute path to a repository folder:
+
+```json
+{
+  "repository_path": "C:\\Users\\YourUser\\Desktop\\sample-project"
+}
+```
+
+The endpoint returns supported relative file paths and extensions. It does not read or execute source files. It skips common dependency/build/cache directories, symbolic links, environment files, and common private-key files. The scan is limited to 5,000 files and 20 directory levels.
+
+**Local-use safety note:** this development API accepts an absolute path from the request and inspects it using the permissions of the account running the backend. Keep the server on your own machine; do not expose it to an untrusted network. This is not an authorization boundary for a multi-user deployment.
+
+## Run the frontend
+
+In terminal 2, from the repository root:
 
 ```powershell
 cd frontend
@@ -57,19 +74,27 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite, usually http://localhost:5173. Select **Check connection**; the status should change to **Connected** while the backend is running.
+Open the local URL printed by Vite, usually http://localhost:5173. Click **Check backend** while the API is running.
 
-## Commit 1 checks
+## Run backend tests
 
-Backend health check:
-
-```powershell
-Invoke-RestMethod http://127.0.0.1:8000/health
-```
-
-Frontend production build (run from `frontend/`):
+From the repository root:
 
 ```powershell
-npm run build
+python -m unittest discover -s tests -v
 ```
 
+The tests use Python's built-in `unittest` and do not require an additional test package.
+
+## Roadmap
+
+1. Project foundation
+2. Safe repository inspection
+3. Tree-sitter AST-aware code chunking
+4. Sentence-transformers embeddings and Chroma indexing
+5. Semantic code search
+6. Ollama-powered RAG
+7. Source citations and evidence validation
+8. MCP server and repository tools
+9. API integration and end-to-end testing
+10. Security, documentation, and final frontend design
