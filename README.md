@@ -6,7 +6,8 @@ A free, local-first assistant for exploring repositories, searching code by mean
 
 - **C1:** FastAPI and React + Vite foundation.
 - **C2:** Safe, lightweight repository structure inspection.
-- Not implemented yet: tree-sitter chunking, embeddings, Chroma, Ollama RAG, citation validation, and MCP.
+- **C3:** Tree-sitter AST-aware source-code chunking with file and line metadata.
+- Not implemented yet: embeddings, Chroma, Ollama RAG, citation validation, and MCP.
 
 ## Prerequisites
 
@@ -64,6 +65,22 @@ The endpoint returns supported relative file paths and extensions. It does not r
 
 **Local-use safety note:** this development API accepts an absolute path from the request and inspects it using the permissions of the account running the backend. Keep the server on your own machine; do not expose it to an untrusted network. This is not an authorization boundary for a multi-user deployment.
 
+
+### Create AST-aware code chunks (C3)
+
+The chunker uses Tree-sitter grammars for supported programming languages (Python, JavaScript/JSX, TypeScript/TSX, Java, C/C++, C#, Go, Rust, Ruby, and PHP). It prefers function, method, class, and other definition nodes; files without recognized definitions fall back to line-based module chunks. Every chunk includes a relative file path, language, syntax-node kind, optional symbol name, and 1-based start/end lines. Oversized syntax nodes are split at line boundaries.
+
+After installing the updated backend requirements, open http://127.0.0.1:8000/docs and try `POST /repository/chunk`:
+
+```json
+{
+  "repository_path": "C:\\Users\\YourUser\\Desktop\\sample-project",
+  "max_chars": 6000
+}
+```
+
+`max_chars` must be between 500 and 12,000. Files larger than 1 MB are skipped. The endpoint returns source snippets as chunk content, so keep the local API private and only select repositories whose code may be processed locally.
+
 ## Run the frontend
 
 In terminal 2, from the repository root:
@@ -90,7 +107,7 @@ The tests use Python's built-in `unittest` and do not require an additional test
 
 1. Project foundation
 2. Safe repository inspection
-3. Tree-sitter AST-aware code chunking
+3. Tree-sitter AST-aware code chunking (implemented)
 4. Sentence-transformers embeddings and Chroma indexing
 5. Semantic code search
 6. Ollama-powered RAG

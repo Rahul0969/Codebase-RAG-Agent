@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .repository import inspect_repository
+from .chunker import chunk_repository, DEFAULT_MAX_CHARS, MIN_MAX_CHARS, MAX_MAX_CHARS
 
 app = FastAPI(
     title="Codebase RAG Assistant API",
     description="Local-first API for understanding and searching code repositories.",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 # Vite's development server runs on port 5173 by default.
@@ -43,3 +44,19 @@ def inspect_repository_endpoint(request: RepositoryRequest) -> dict:
         return inspect_repository(request.repository_path)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+class ChunkRequest(BaseModel):
+    repository_path: str = Field(min_length=1, max_length=4096)
+    max_chars: int = Field(default=DEFAULT_MAX_CHARS, ge=MIN_MAX_CHARS, le=MAX_MAX_CHARS)
+
+
+@app.post("/repository/chunk", tags=["repository"])
+def chunk_repository_endpoint(request: ChunkRequest) -> dict:
+    """Create syntax-aware chunks for supported source files in a repository."""
+    try:
+        return chunk_repository(request.repository_path, request.max_chars)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
